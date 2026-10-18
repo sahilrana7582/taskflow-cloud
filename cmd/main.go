@@ -2,31 +2,30 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
-	"github.com/joho/godotenv"
-	"github.com/sahilrana27582/taskflow/internal/auth"
-	"github.com/sahilrana27582/taskflow/internal/db"
-	"github.com/sahilrana27582/taskflow/internal/routes"
-	"github.com/sahilrana27582/taskflow/internal/server"
+	"github.com/sahilrana7582/taskflow-cloud/internal/auth"
+	"github.com/sahilrana7582/taskflow-cloud/internal/config"
+	"github.com/sahilrana7582/taskflow-cloud/internal/db"
+	"github.com/sahilrana7582/taskflow-cloud/internal/routes"
+	"github.com/sahilrana7582/taskflow-cloud/internal/server"
 )
 
-func init() {
-	fmt.Println("Running INIT")
-	godotenv.Load()
-}
-
 func main() {
+	// Load Config
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal("Failed to load config:", err)
+	}
 	// 1. Connect to PostgreSQL.
-	pool, err := db.Conn(context.Background())
+	pool, err := db.Conn(context.Background(), cfg)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	defer pool.Close()
 
 	// 2. Run database migrations.
-	if err := db.RunMigrations(); err != nil {
+	if err := db.RunMigrations(cfg); err != nil {
 		log.Fatal("Failed to run migrations:", err)
 	}
 

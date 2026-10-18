@@ -4,15 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
+	"github.com/sahilrana7582/taskflow-cloud/internal/config"
 )
 
-func RunMigrations() error {
-	databaseURL := os.Getenv("DATABASE_URL")
-	migrationPath := os.Getenv("DB_MIGRATION_PATH")
+func RunMigrations(cfg *config.Config) error {
+	databaseURL := cfg.DatabaseURL
+	migrationPath := cfg.Database.Migrations.Path
 	if databaseURL == "" {
 		return fmt.Errorf("DATABASE_URL is not set")
 	}
