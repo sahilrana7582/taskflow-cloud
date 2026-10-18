@@ -33,7 +33,9 @@ func Load() (*Config, error) {
 	// Bind environment variables explicitly for predictable mapping.
 	_ = v.BindEnv("database.url", "DATABASE_URL")
 	_ = v.BindEnv("database.password", "TASKFLOW_DATABASE_PASSWORD")
+	_ = v.BindEnv("jwt_secret_key", "JWT_SECRET_KEY")
 
+	cfg.JwtSecretKey = v.GetString("jwt_secret_key")
 	cfg.Database.Password = v.GetString("database.password")
 
 	cfg.DatabaseURL = v.GetString("database.url")

@@ -10,6 +10,7 @@ func NewServeMux(authHandler *auth.AuthHandler) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/auth/register", authHandler.Register)
+	mux.HandleFunc("/auth/login", authHandler.Login)
 
 	return mux
 }

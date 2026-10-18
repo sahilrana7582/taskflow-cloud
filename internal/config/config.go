@@ -20,5 +20,6 @@ type Config struct {
 		URL string `mapstructure:"url"`
 	} `mapstructure:"database"`
 
-	DatabaseURL string `mapstructure:"-"`
+	DatabaseURL  string `mapstructure:"-"`
+	JwtSecretKey string `mapstructure:"-"`
 }

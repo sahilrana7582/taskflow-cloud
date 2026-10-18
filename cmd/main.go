@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/sahilrana7582/taskflow-cloud/internal/auth"
 	"github.com/sahilrana7582/taskflow-cloud/internal/config"
@@ -17,6 +18,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
 	}
+
+	// Validate the JWT settings before touching the database, so a missing or
+	// weak secret stops startup immediately.
+	tokens, err := auth.NewTokenManager(cfg.JwtSecretKey, cfg.App.Name, 4*time.Hour)
+	if err != nil {
+		log.Fatal("Failed to configure JWT:", err)
+	}
+
 	// 1. Connect to PostgreSQL.
 	pool, err := db.Conn(context.Background(), cfg)
 	if err != nil {
@@ -31,7 +40,7 @@ func main() {
 
 	// 3. Wire dependencies and register routes.
 	userRepo := auth.NewUserRepository(pool)
-	authService := auth.NewAuthService(userRepo)
+	authService := auth.NewAuthService(userRepo, tokens)
 	authHandler := auth.NewAuthHandler(authService)
 
 	mux := routes.NewServeMux(authHandler)
