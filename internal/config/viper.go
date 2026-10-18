@@ -32,7 +32,7 @@ func Load() (*Config, error) {
 
 	// Bind environment variables explicitly for predictable mapping.
 	_ = v.BindEnv("database.url", "DATABASE_URL")
-	_ = v.BindEnv("database.password", "DB_PASSWORD")
+	_ = v.BindEnv("database.password", "TASKFLOW_DATABASE_PASSWORD")
 
 	cfg.Database.Password = v.GetString("database.password")
 

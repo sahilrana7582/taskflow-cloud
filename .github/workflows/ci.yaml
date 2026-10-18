@@ -50,3 +50,46 @@ jobs:
 
       - name: Run go vet
         run: go vet ./...
+
+  integration:
+    name: PostgreSQL integration tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: taskflow
+          POSTGRES_PASSWORD: taskflow_test_password
+          POSTGRES_DB: taskflow_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U taskflow -d taskflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      TASKFLOW_INTEGRATION: "1"
+      TASKFLOW_DATABASE_HOST: localhost
+      TASKFLOW_DATABASE_PORT: "5432"
+      TASKFLOW_DATABASE_NAME: taskflow_test
+      TASKFLOW_DATABASE_USER: taskflow
+      TASKFLOW_DATABASE_PASSWORD: taskflow_test_password
+      TASKFLOW_DATABASE_SSLMODE: disable
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # -count=1 bypasses the test cache: setup-go restores it, and a cached
+      # pass would not have touched the database at all.
+      - name: Run PostgreSQL integration tests
+        run: go test -v -count=1 -run Integration ./...
