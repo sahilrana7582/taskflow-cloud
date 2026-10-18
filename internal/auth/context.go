@@ -2,8 +2,10 @@ package auth
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/sahilrana7582/taskflow-cloud/internal/utils"
 )
 
 // claimsKey is the context key for verified claims. Because the type is
@@ -36,4 +38,14 @@ func UserIDFromContext(ctx context.Context) (uuid.UUID, bool) {
 		return uuid.Nil, false
 	}
 	return id, true
+}
+
+// RequireUserID returns the authenticated user's ID for handlers behind the
+// auth middleware. If there is none, it writes a 401 and returns false.
+func RequireUserID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
+	id, ok := UserIDFromContext(r.Context())
+	if !ok {
+		utils.WriteError(w, r, utils.Unauthorized("authentication required"))
+	}
+	return id, ok
 }
