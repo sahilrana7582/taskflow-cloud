@@ -6,10 +6,10 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
-	"github.com/sahilrana27582/taskflow/internal/auth"
-	"github.com/sahilrana27582/taskflow/internal/db"
-	"github.com/sahilrana27582/taskflow/internal/routes"
-	"github.com/sahilrana27582/taskflow/internal/server"
+	"github.com/sahilrana7582/taskflow-cloud/internal/auth"
+	"github.com/sahilrana7582/taskflow-cloud/internal/db"
+	"github.com/sahilrana7582/taskflow-cloud/internal/routes"
+	"github.com/sahilrana7582/taskflow-cloud/internal/server"
 )
 
 func init() {

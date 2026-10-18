@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sahilrana27582/taskflow/internal/utils"
+	"github.com/sahilrana7582/taskflow-cloud/internal/utils"
 )
 
 type AuthService struct {

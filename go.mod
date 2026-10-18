@@ -1,4 +1,4 @@
-module github.com/sahilrana7582/taskflow-cloud.git
+module github.com/sahilrana7582/taskflow-cloud
 
 go 1.26.6
 

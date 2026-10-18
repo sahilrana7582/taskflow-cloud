@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/sahilrana27582/taskflow/internal/utils"
+	"github.com/sahilrana7582/taskflow-cloud/internal/utils"
 )
 
 // userColumns is the column list every query returns, in the order scanUser reads them.

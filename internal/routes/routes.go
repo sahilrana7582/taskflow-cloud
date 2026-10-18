@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	"github.com/sahilrana27582/taskflow/internal/auth"
+	"github.com/sahilrana7582/taskflow-cloud/internal/auth"
 )
 
 func NewServeMux(authHandler *auth.AuthHandler) *http.ServeMux {
