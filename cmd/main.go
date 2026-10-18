@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
+	"github.com/sahilrana27582/taskflow/internal/auth"
 	"github.com/sahilrana27582/taskflow/internal/db"
 	"github.com/sahilrana27582/taskflow/internal/routes"
 	"github.com/sahilrana27582/taskflow/internal/server"
@@ -18,19 +19,23 @@ func init() {
 
 func main() {
 	// 1. Connect to PostgreSQL.
-	conn, err := db.Conn()
+	pool, err := db.Conn(context.Background())
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
-	defer conn.Close(context.Background())
+	defer pool.Close()
 
 	// 2. Run database migrations.
 	if err := db.RunMigrations(); err != nil {
 		log.Fatal("Failed to run migrations:", err)
 	}
 
-	// 3. Register routes.
-	mux := routes.NewServeMux()
+	// 3. Wire dependencies and register routes.
+	userRepo := auth.NewUserRepository(pool)
+	authService := auth.NewAuthService(userRepo)
+	authHandler := auth.NewAuthHandler(authService)
+
+	mux := routes.NewServeMux(authHandler)
 
 	// 4. Start the HTTP server.
 	srv := server.NewServer("8080", mux)

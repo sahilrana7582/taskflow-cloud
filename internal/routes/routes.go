@@ -3,13 +3,13 @@ package routes
 import (
 	"net/http"
 
-	"github.com/sahilrana27582/taskflow/internal/handler"
+	"github.com/sahilrana27582/taskflow/internal/auth"
 )
 
-func NewServeMux() *http.ServeMux {
+func NewServeMux(authHandler *auth.AuthHandler) *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /jobs", handler.GetJob)
+	mux.HandleFunc("/auth/register", authHandler.Register)
 
 	return mux
 }
