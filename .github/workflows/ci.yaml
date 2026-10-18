@@ -1,5 +1,5 @@
 
-name: Go CI
+name: TaskFlow CI
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test:
-    name: Test Go application
+    name: Go quality checks
     runs-on: ubuntu-latest
 
     steps:
@@ -22,15 +22,31 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version-file: go.mod
           cache: true
 
       - name: Verify formatting
         run: |
-          test -z "$(gofmt -l .)"
+          files="$(gofmt -l .)"
+          if [ -n "$files" ]; then
+            echo "The following Go files need formatting:"
+            echo "$files"
+            exit 1
+          fi
 
-      - name: Run tests
-        run: go test -race -cover ./...
+      - name: Verify module dependencies
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+
+      - name: Run unit tests
+        run: go test ./...
+
+      - name: Run race-enabled tests with coverage
+        run: go test -race -coverprofile=coverage.out ./...
 
       - name: Build application
         run: go build ./...
+
+      - name: Run go vet
+        run: go vet ./...

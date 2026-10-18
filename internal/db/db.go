@@ -5,27 +5,28 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"os"
+	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sahilrana7582/taskflow-cloud/internal/config"
 )
 
 // Conn opens a pgx connection pool from the DB_* environment variables and
 // verifies it with a ping. The caller owns the pool and must Close it.
-func Conn(ctx context.Context) (*pgxpool.Pool, error) {
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
+func Conn(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {
+	host := cfg.Database.Host
+	port := cfg.Database.Port
+	user := cfg.Database.User
+	password := cfg.Database.Password
+	dbname := cfg.Database.Name
 
-	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
+	if host == "" || port == 0 || user == "" || password == "" || dbname == "" {
 		return nil, fmt.Errorf("database configuration is incomplete")
 	}
 
 	// Local Postgres has no TLS; set DB_SSLMODE=require (or verify-full) for RDS.
-	sslmode := os.Getenv("DB_SSLMODE")
+	sslmode := cfg.Database.SSLMode
 	if sslmode == "" {
 		sslmode = "disable"
 	}
@@ -35,23 +36,23 @@ func Conn(ctx context.Context) (*pgxpool.Pool, error) {
 	dsn := url.URL{
 		Scheme:   "postgres",
 		User:     url.UserPassword(user, password),
-		Host:     net.JoinHostPort(host, port),
+		Host:     net.JoinHostPort(host, strconv.Itoa(port)),
 		Path:     "/" + dbname,
 		RawQuery: url.Values{"sslmode": {sslmode}}.Encode(),
 	}
 
-	cfg, err := pgxpool.ParseConfig(dsn.String())
+	dbCfg, err := pgxpool.ParseConfig(dsn.String())
 	if err != nil {
 		return nil, fmt.Errorf("parse database config: %w", err)
 	}
 
-	cfg.MaxConns = 10
-	cfg.MinConns = 2
-	cfg.MaxConnLifetime = time.Hour
-	cfg.MaxConnIdleTime = 30 * time.Minute
-	cfg.HealthCheckPeriod = time.Minute
+	dbCfg.MaxConns = 10
+	dbCfg.MinConns = 2
+	dbCfg.MaxConnLifetime = time.Hour
+	dbCfg.MaxConnIdleTime = 30 * time.Minute
+	dbCfg.HealthCheckPeriod = time.Minute
 
-	pool, err := pgxpool.NewWithConfig(ctx, cfg)
+	pool, err := pgxpool.NewWithConfig(ctx, dbCfg)
 	if err != nil {
 		return nil, fmt.Errorf("create connection pool: %w", err)
 	}
