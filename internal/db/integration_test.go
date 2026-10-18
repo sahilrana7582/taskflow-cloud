@@ -6,8 +6,6 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"errors"
-	"net"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -61,7 +59,7 @@ func TestIntegrationMigrations(t *testing.T) {
 		t.Fatalf("RunMigrations on migrated database: %v", err)
 	}
 
-	sqlDB, err := sql.Open("postgres", cfg.DatabaseURL)
+	sqlDB, err := sql.Open("postgres", cfg.Database.URL())
 	if err != nil {
 		t.Fatalf("open database: %v", err)
 	}
@@ -137,7 +135,7 @@ func newTestDatabase(t *testing.T) *config.Config {
 	cfg.Database.SSLMode = cmp.Or(os.Getenv("TASKFLOW_DATABASE_SSLMODE"), "disable")
 	cfg.Database.Migrations.Path = "migrations"
 
-	admin, err := pgx.Connect(t.Context(), databaseURL(cfg))
+	admin, err := pgx.Connect(t.Context(), cfg.Database.URL())
 	if err != nil {
 		t.Fatalf("connect to %s: %v", cfg.Database.Name, err)
 	}
@@ -158,7 +156,6 @@ func newTestDatabase(t *testing.T) *config.Config {
 	})
 
 	cfg.Database.Name = name
-	cfg.DatabaseURL = databaseURL(cfg)
 	return cfg
 }
 
@@ -178,17 +175,6 @@ func newMigratedPool(t *testing.T) *pgxpool.Pool {
 	}
 	t.Cleanup(pool.Close)
 	return pool
-}
-
-func databaseURL(cfg *config.Config) string {
-	u := url.URL{
-		Scheme:   "postgres",
-		User:     url.UserPassword(cfg.Database.User, cfg.Database.Password),
-		Host:     net.JoinHostPort(cfg.Database.Host, strconv.Itoa(cfg.Database.Port)),
-		Path:     "/" + cfg.Database.Name,
-		RawQuery: url.Values{"sslmode": {cfg.Database.SSLMode}}.Encode(),
-	}
-	return u.String()
 }
 
 func requireEnv(t *testing.T, key string) string {

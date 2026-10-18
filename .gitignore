@@ -3,8 +3,7 @@
 # Never commit real credentials. Commit .env.example with placeholders.
 # In AWS, real values live in Secrets Manager / SSM Parameter Store.
 # ------------------------------------------------------------------
-.env
-.env.*
+.env*
 !.env.example
 *.env
 

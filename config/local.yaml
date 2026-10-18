@@ -1,7 +1,8 @@
-
+# Settings for TASKFLOW_APP_ENVIRONMENT=local (the default), i.e. `go run` on
+# your machine. Production never reads this file: it takes every setting from
+# TASKFLOW_* environment variables. Secrets don't belong here; they come from .env.
 app:
   name: taskflow-cloud
-  environment: local
   port: 8080
 
 database:

@@ -1,0 +1,13 @@
+# Secrets: the container gets them as environment variables, never as a file
+# baked into an image layer.
+.env*
+
+# Local-only settings: the container always runs with
+# TASKFLOW_APP_ENVIRONMENT=production and must not fall back to them.
+config/
+
+# Build output and tooling the image doesn't need.
+taskflow
+coverage.out
+.git
+.github

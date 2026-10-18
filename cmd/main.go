@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/sahilrana7582/taskflow-cloud/internal/auth"
@@ -59,9 +60,9 @@ func main() {
 	}, tokens)
 
 	// 4. Start the HTTP server.
-	srv := server.NewServer("8080", mux)
+	srv := server.NewServer(strconv.Itoa(cfg.App.Port), mux)
 
-	log.Println("Starting server on port 8080")
+	log.Printf("Starting server on port %d (%s)", cfg.App.Port, cfg.App.Environment)
 	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal("Server failed:", err)
 	}

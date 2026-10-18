@@ -1,0 +1,48 @@
+
+services:
+  taskflow-be:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # env_file sets variables inside the container (here: the secrets).
+    # Anything also listed under environment: is overridden by that value.
+    env_file:
+      - .env
+    environment:
+      TASKFLOW_APP_ENVIRONMENT: production
+      TASKFLOW_APP_NAME: taskflow-cloud
+      TASKFLOW_APP_PORT: "8080"
+      TASKFLOW_DATABASE_HOST: taskflow-db
+      TASKFLOW_DATABASE_PORT: "5432"
+      TASKFLOW_DATABASE_NAME: taskflow_dev
+      TASKFLOW_DATABASE_USER: taskflow
+      TASKFLOW_DATABASE_SSLMODE: disable
+      TASKFLOW_DATABASE_MIGRATIONS_PATH: internal/db/migrations
+    ports:
+      - "8080:8080"
+    depends_on:
+      taskflow-db:
+        condition: service_healthy
+
+  taskflow-db:
+    image: postgres:17
+    container_name: taskflow-postgres
+    environment:
+      POSTGRES_DB: taskflow_dev
+      POSTGRES_USER: taskflow
+      # ${} is filled in by compose itself, from your shell or the .env file
+      # next to this one (never from env_file:). :? stops `up` with this message
+      # instead of starting Postgres with a blank password.
+      POSTGRES_PASSWORD: ${TASKFLOW_DATABASE_PASSWORD:?set TASKFLOW_DATABASE_PASSWORD in .env}
+    ports:
+      - "54432:5432"
+    volumes:
+      - taskflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskflow -d taskflow_dev"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  taskflow-postgres-data:

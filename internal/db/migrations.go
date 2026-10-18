@@ -11,13 +11,9 @@ import (
 )
 
 func RunMigrations(cfg *config.Config) error {
-	databaseURL := cfg.DatabaseURL
 	migrationPath := cfg.Database.Migrations.Path
-	if databaseURL == "" {
-		return fmt.Errorf("DATABASE_URL is not set")
-	}
 
-	sqlDB, err := sql.Open("postgres", databaseURL)
+	sqlDB, err := sql.Open("postgres", cfg.Database.URL())
 	if err != nil {
 		return fmt.Errorf("failed to open database for migrations: %w", err)
 	}
