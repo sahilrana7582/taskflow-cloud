@@ -1,0 +1,133 @@
+# ------------------------------------------------------------------
+# Secrets & environment
+# Never commit real credentials. Commit .env.example with placeholders.
+# In AWS, real values live in Secrets Manager / SSM Parameter Store.
+# ------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.env
+
+# Private keys, certificates, keystores
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.csr
+id_rsa*
+id_ed25519*
+
+# AWS credentials (use OIDC in CI, SSO/profiles locally — never keys in repo)
+.aws/
+
+# ------------------------------------------------------------------
+# Go
+# ------------------------------------------------------------------
+# Compiled binaries
+/bin/
+/dist/
+/build/
+/taskflow
+/main
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binaries and coverage output
+*.test
+*.out
+coverage.*
+cover.*
+*.coverprofile
+/test-results/
+
+# Go workspace file (local multi-module setups)
+go.work
+go.work.sum
+
+# Dependency vendoring (uncomment if you decide not to commit vendor/)
+# /vendor/
+
+# Live-reload tool (air) build dir
+/tmp/
+.air.toml.local
+
+# ------------------------------------------------------------------
+# Docker / local runtime data
+# ------------------------------------------------------------------
+docker-compose.override.yml
+compose.override.yml
+/pgdata/
+/.docker-data/
+/volumes/
+
+# ------------------------------------------------------------------
+# Terraform (Phase 7)
+# Keep .terraform.lock.hcl COMMITTED so provider versions are pinned.
+# ------------------------------------------------------------------
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+crash.log
+crash.*.log
+*.tfplan
+tfplan
+plan.out
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# tfvars often contain secrets/account-specific values; commit *.tfvars.example
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# ------------------------------------------------------------------
+# Kubernetes / EKS / Helm (Phase 7)
+# ------------------------------------------------------------------
+kubeconfig
+kubeconfig*
+*.kubeconfig
+.kube/
+# Rendered/decoded secrets — commit manifests that reference secrets, not values
+*secret*.decoded.yaml
+*.secret.yaml
+charts/*.tgz
+.helm/
+
+# ------------------------------------------------------------------
+# CI/CD & tooling artifacts
+# ------------------------------------------------------------------
+# Vulnerability / SBOM scan output (trivy, grype, govulncheck)
+trivy-results.*
+*.sarif
+sbom.*
+# Load-test results (k6, vegeta, hey)
+/loadtest/results/
+
+# ------------------------------------------------------------------
+# Logs
+# ------------------------------------------------------------------
+*.log
+logs/
+
+# ------------------------------------------------------------------
+# Editors & OS
+# ------------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
