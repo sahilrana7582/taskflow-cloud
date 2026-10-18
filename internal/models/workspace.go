@@ -34,6 +34,11 @@ func (r WorkspaceRole) Valid() bool {
 	return false
 }
 
+// CanRead reports whether the role may view the workspace. Every member can.
+func (r WorkspaceRole) CanRead() bool {
+	return r.Valid()
+}
+
 // CanWrite reports whether the role may create and edit projects, jobs and comments.
 func (r WorkspaceRole) CanWrite() bool {
 	return r == WorkspaceRoleOwner || r == WorkspaceRoleAdmin || r == WorkspaceRoleMember
