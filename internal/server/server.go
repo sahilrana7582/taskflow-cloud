@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func NewServer(port string, mux *http.ServeMux) *http.Server {
+func NewServer(port string, mux http.Handler) *http.Server {
 	return &http.Server{
 		Addr:         ":" + port,
 		Handler:      mux,

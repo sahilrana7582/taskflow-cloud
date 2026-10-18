@@ -43,10 +43,10 @@ func main() {
 	authService := auth.NewAuthService(userRepo, tokens)
 	authHandler := auth.NewAuthHandler(authService)
 
-	mux := routes.NewServeMux(authHandler)
+	mux := routes.NewServeMux(authHandler, tokens)
 
 	// 4. Start the HTTP server.
-	srv := server.NewServer("8080", mux)
+	srv := server.NewServer("8080", *mux)
 
 	log.Println("Starting server on port 8080")
 	if err := srv.ListenAndServe(); err != nil {
