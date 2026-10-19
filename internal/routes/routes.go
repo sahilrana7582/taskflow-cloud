@@ -7,6 +7,7 @@ import (
 	"github.com/sahilrana7582/taskflow-cloud/internal/job"
 	"github.com/sahilrana7582/taskflow-cloud/internal/middleware"
 	"github.com/sahilrana7582/taskflow-cloud/internal/project"
+	"github.com/sahilrana7582/taskflow-cloud/internal/utils"
 	"github.com/sahilrana7582/taskflow-cloud/internal/workspace"
 )
 
@@ -23,6 +24,9 @@ func NewServeMux(h Handlers, tokenManager *auth.TokenManager) http.Handler {
 
 	mux.HandleFunc("/auth/register", h.Auth.Register)
 	mux.HandleFunc("/auth/login", h.Auth.Login)
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		utils.WriteJSON(w, http.StatusOK, "Healthy")
+	})
 
 	// Everything below is mounted under /api and requires a valid access token.
 	protectedMux := http.NewServeMux()

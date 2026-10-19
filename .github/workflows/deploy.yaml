@@ -1,0 +1,54 @@
+
+name: TaskFlow CI and ECR
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPO: ${{ vars.ECR_REPO }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Configure AWS credentials
+        if: github.event_name == 'push'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        if: github.event_name == 'push'
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: docker build -t taskflow-cloud:${{ github.sha }} .
+
+      - name: Tag image for ECR
+        if: github.event_name == 'push'
+        run: docker tag taskflow-cloud:${{ github.sha }} "${ECR_REPO}:${GITHUB_SHA}"
+
+      - name: Push image to ECR
+        if: github.event_name == 'push'
+        run: docker push "${ECR_REPO}:${GITHUB_SHA}"
