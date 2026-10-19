@@ -67,3 +67,8 @@ func main() {
 		log.Fatal("Server failed:", err)
 	}
 }
+
+// Will Make the small go project to understand the volumne mounting in the docker
+// the go backend will make the one dir and have some data there
+// and i will use that dir as the volumne for the every new go docker container
+// so that i can start from there every time.
