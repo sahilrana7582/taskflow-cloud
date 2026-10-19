@@ -2,12 +2,11 @@
 name: TaskFlow CI and ECR
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - TaskFlow CI
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -16,14 +15,24 @@ permissions:
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ECR_REPO: ${{ vars.ECR_REPO }}
+  # Under workflow_run, GITHUB_SHA is the latest commit on main, not
+  # necessarily the commit CI just tested.
+  IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
 
 jobs:
   build-and-push:
+    # Only ship commits that passed CI on a push to main; CI also runs for PRs.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -32,23 +41,19 @@ jobs:
           cache: true
 
       - name: Configure AWS credentials
-        if: github.event_name == 'push'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Log in to Amazon ECR
-        if: github.event_name == 'push'
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
-        run: docker build -t taskflow-cloud:${{ github.sha }} .
+        run: docker build -t "taskflow-cloud:${IMAGE_TAG}" .
 
       - name: Tag image for ECR
-        if: github.event_name == 'push'
-        run: docker tag taskflow-cloud:${{ github.sha }} "${ECR_REPO}:${GITHUB_SHA}"
+        run: docker tag "taskflow-cloud:${IMAGE_TAG}" "${ECR_REPO}:${IMAGE_TAG}"
 
       - name: Push image to ECR
-        if: github.event_name == 'push'
-        run: docker push "${ECR_REPO}:${GITHUB_SHA}"
+        run: docker push "${ECR_REPO}:${IMAGE_TAG}"
