@@ -14,11 +14,19 @@
 *.pfx
 *.crt
 *.csr
+*.jks
+*.keystore
 id_rsa*
 id_ed25519*
+id_ecdsa*
+.netrc
 
 # AWS credentials (use OIDC in CI, SSO/profiles locally — never keys in repo)
 .aws/
+# Access-key CSVs downloaded from the IAM console
+*accessKeys*.csv
+*credentials*.csv
+rootkey.csv
 
 # ------------------------------------------------------------------
 # Go
@@ -64,29 +72,48 @@ compose.override.yml
 /volumes/
 
 # ------------------------------------------------------------------
-# Terraform (Phase 7)
+# Terraform
+# State and plan files store every attribute in PLAINTEXT, including
+# passwords and keys, even when no .tf file mentions a secret.
 # Keep .terraform.lock.hcl COMMITTED so provider versions are pinned.
 # ------------------------------------------------------------------
+# Provider binaries, downloaded modules, and the cached backend config
 **/.terraform/*
+
+# Local state, backups, and per-workspace state
 *.tfstate
 *.tfstate.*
+terraform.tfstate.d/
 .terraform.tfstate.lock.info
+
+# Saved plans (binary) and their JSON renders from `terraform show -json`
+*.tfplan
+*.tfplan.json
+tfplan
+tfplan.*
+plan.out
+plan.json
+
+# Crash logs dump full API requests/responses, which can include secrets
 crash.log
 crash.*.log
-*.tfplan
-tfplan
-plan.out
+
+# Variable values: commit *.tfvars.example with placeholders instead
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Local overrides meant for one machine only
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# CLI config and API tokens (`terraform login` writes credentials.tfrc.json)
 .terraformrc
 terraform.rc
-
-# tfvars often contain secrets/account-specific values; commit *.tfvars.example
-*.tfvars
-*.tfvars.json
-!*.tfvars.example
+credentials.tfrc.json
+.terraform.d/
 
 # ------------------------------------------------------------------
 # Kubernetes / EKS / Helm (Phase 7)
