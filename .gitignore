@@ -125,6 +125,8 @@ kubeconfig*
 # Rendered/decoded secrets — commit manifests that reference secrets, not values
 *secret*.decoded.yaml
 *.secret.yaml
+# Plain Secret manifests hold real values; commit secret.yaml.example instead
+platform/k8s/**/secret.yaml
 charts/*.tgz
 .helm/
 
