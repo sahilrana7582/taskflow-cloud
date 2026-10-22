@@ -5,6 +5,10 @@ metadata:
   namespace: taskflow
 spec:
   replicas: 1
+  # Two Postgres pods must never share one data directory, so stop the old pod
+  # before starting the new one instead of overlapping them.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: postgres
@@ -34,6 +38,13 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_DB
+            # A subdirectory of the volume: Postgres won't initialise a
+            # non-empty directory, and some volumes ship with lost+found.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
           readinessProbe:
             exec:
               command:
@@ -42,3 +53,13 @@ spec:
                 - pg_isready -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"
             initialDelaySeconds: 5
             periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-data

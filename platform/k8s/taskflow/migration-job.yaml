@@ -19,11 +19,21 @@ spec:
             - sh
             - -c
             - |
-              until pg_isready -h taskflow-postgres -p 5432 -U "$DB_USER"; do
+              until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
                 echo "Waiting for PostgreSQL..."
                 sleep 2
               done
           env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: taskflow-config
+                  key: TASKFLOW_DATABASE_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: taskflow-config
+                  key: TASKFLOW_DATABASE_PORT
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
@@ -43,9 +53,15 @@ spec:
             ]
           env:
             - name: DB_HOST
-              value: taskflow-postgres
+              valueFrom:
+                configMapKeyRef:
+                  name: taskflow-config
+                  key: TASKFLOW_DATABASE_HOST
             - name: DB_PORT
-              value: "5432"
+              valueFrom:
+                configMapKeyRef:
+                  name: taskflow-config
+                  key: TASKFLOW_DATABASE_PORT
             - name: DB_USER
               valueFrom:
                 secretKeyRef:

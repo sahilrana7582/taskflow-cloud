@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskflow-config
+  namespace: taskflow
+data:
+  # production = read every setting from TASKFLOW_* env vars, never config/local.yaml.
+  TASKFLOW_APP_ENVIRONMENT: production
+  TASKFLOW_APP_NAME: taskflow-cloud
+  TASKFLOW_APP_PORT: "8080"
+  TASKFLOW_DATABASE_HOST: taskflow-postgres
+  TASKFLOW_DATABASE_PORT: "5432"
+  TASKFLOW_DATABASE_SSLMODE: disable
+  # config.Load requires it, but the app doesn't run migrations; the
+  # taskflow-migrations Job does.
+  TASKFLOW_DATABASE_MIGRATIONS_PATH: /migrations
