@@ -1,4 +1,3 @@
--- +goose Up
 -- A workspace is the tenant boundary: every project and job belongs to exactly one.
 CREATE TABLE workspaces (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -40,7 +39,3 @@ CREATE INDEX workspace_members_user_id_idx ON workspace_members (user_id);
 CREATE TRIGGER workspace_members_set_updated_at
     BEFORE UPDATE ON workspace_members
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- +goose Down
-DROP TABLE IF EXISTS workspace_members;
-DROP TABLE IF EXISTS workspaces;

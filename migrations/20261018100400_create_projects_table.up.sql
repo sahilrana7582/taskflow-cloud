@@ -1,4 +1,3 @@
--- +goose Up
 CREATE TABLE projects (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     workspace_id    UUID NOT NULL REFERENCES workspaces (id) ON DELETE CASCADE,
@@ -29,6 +28,3 @@ CREATE INDEX projects_created_by_idx ON projects (created_by);
 CREATE TRIGGER projects_set_updated_at
     BEFORE UPDATE ON projects
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- +goose Down
-DROP TABLE IF EXISTS projects;

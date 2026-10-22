@@ -25,11 +25,6 @@ COPY --from=builder /out/taskflow /app/taskflow
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt \
     /etc/ssl/certs/ca-certificates.crt
 
-# Goose reads the SQL migrations from disk at startup. Config is not copied:
-# production reads only TASKFLOW_* environment variables, and config/ is
-# excluded by .dockerignore.
-COPY --from=builder /src/internal/db/migrations/ /app/internal/db/migrations/
-
 USER 65532:65532
 
 EXPOSE 8080

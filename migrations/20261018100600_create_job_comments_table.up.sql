@@ -1,4 +1,3 @@
--- +goose Up
 CREATE TABLE job_comments (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     job_id     UUID NOT NULL REFERENCES jobs (id) ON DELETE CASCADE,
@@ -18,6 +17,3 @@ CREATE INDEX job_comments_author_id_idx ON job_comments (author_id);
 CREATE TRIGGER job_comments_set_updated_at
     BEFORE UPDATE ON job_comments
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- +goose Down
-DROP TABLE IF EXISTS job_comments;

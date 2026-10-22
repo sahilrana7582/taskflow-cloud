@@ -47,40 +47,6 @@ func TestIntegrationConn(t *testing.T) {
 	}
 }
 
-func TestIntegrationMigrations(t *testing.T) {
-	cfg := newTestDatabase(t)
-	migrationsDir := cfg.Database.Migrations.Path
-
-	if err := RunMigrations(cfg); err != nil {
-		t.Fatalf("RunMigrations on empty database: %v", err)
-	}
-	// The app migrates on every start, so a second run must be a no-op.
-	if err := RunMigrations(cfg); err != nil {
-		t.Fatalf("RunMigrations on migrated database: %v", err)
-	}
-
-	sqlDB, err := sql.Open("postgres", cfg.Database.URL())
-	if err != nil {
-		t.Fatalf("open database: %v", err)
-	}
-	t.Cleanup(func() { sqlDB.Close() })
-
-	latest := latestMigrationVersion(t, migrationsDir)
-	requireDBVersion(t, sqlDB, latest)
-
-	// Rolling everything back and migrating up again proves every Down section
-	// fully undoes its Up: a leftover table would make CREATE TABLE fail.
-	if err := goose.Reset(sqlDB, migrationsDir); err != nil {
-		t.Fatalf("roll back all migrations: %v", err)
-	}
-	requireDBVersion(t, sqlDB, 0)
-
-	if err := RunMigrations(cfg); err != nil {
-		t.Fatalf("RunMigrations after rollback: %v", err)
-	}
-	requireDBVersion(t, sqlDB, latest)
-}
-
 func TestIntegrationUsersConstraints(t *testing.T) {
 	pool := newMigratedPool(t)
 	ctx := t.Context()
@@ -165,9 +131,6 @@ func newMigratedPool(t *testing.T) *pgxpool.Pool {
 	t.Helper()
 
 	cfg := newTestDatabase(t)
-	if err := RunMigrations(cfg); err != nil {
-		t.Fatalf("RunMigrations: %v", err)
-	}
 
 	pool, err := Conn(t.Context(), cfg)
 	if err != nil {

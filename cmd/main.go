@@ -37,11 +37,6 @@ func main() {
 	}
 	defer pool.Close()
 
-	// 2. Run database migrations.
-	if err := db.RunMigrations(cfg); err != nil {
-		log.Fatal("Failed to run migrations:", err)
-	}
-
 	// 3. Wire dependencies and register routes.
 	userRepo := auth.NewUserRepository(pool)
 	authService := auth.NewAuthService(userRepo, tokens)

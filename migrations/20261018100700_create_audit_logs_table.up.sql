@@ -1,4 +1,3 @@
--- +goose Up
 -- Who did what, when. No foreign keys on purpose: audit rows must outlive
 -- the users, workspaces and jobs they describe.
 CREATE TABLE audit_logs (
@@ -24,18 +23,12 @@ CREATE INDEX audit_logs_workspace_created_idx ON audit_logs (workspace_id, creat
 CREATE INDEX audit_logs_actor_created_idx ON audit_logs (actor_id, created_at DESC);
 
 -- Append-only: block UPDATE and DELETE at the database level.
--- +goose StatementBegin
 CREATE OR REPLACE FUNCTION prevent_audit_log_changes() RETURNS TRIGGER AS $$
 BEGIN
     RAISE EXCEPTION 'audit_logs is append-only';
 END;
 $$ LANGUAGE plpgsql;
--- +goose StatementEnd
 
 CREATE TRIGGER audit_logs_append_only
     BEFORE UPDATE OR DELETE ON audit_logs
     FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_changes();
-
--- +goose Down
-DROP TABLE IF EXISTS audit_logs;
-DROP FUNCTION IF EXISTS prevent_audit_log_changes();

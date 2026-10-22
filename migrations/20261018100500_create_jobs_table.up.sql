@@ -1,4 +1,3 @@
--- +goose Up
 CREATE TABLE jobs (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     workspace_id UUID NOT NULL REFERENCES workspaces (id) ON DELETE CASCADE,
@@ -42,6 +41,3 @@ CREATE INDEX jobs_reporter_id_idx ON jobs (reporter_id);
 CREATE TRIGGER jobs_set_updated_at
     BEFORE UPDATE ON jobs
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- +goose Down
-DROP TABLE IF EXISTS jobs;

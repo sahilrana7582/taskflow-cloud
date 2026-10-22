@@ -1,4 +1,3 @@
--- +goose Up
 -- One row per refresh token. Only the SHA-256 hash is stored, so a DB leak
 -- does not leak usable tokens.
 CREATE TABLE sessions (
@@ -19,6 +18,3 @@ CREATE TABLE sessions (
 CREATE INDEX sessions_user_id_idx ON sessions (user_id) WHERE revoked_at IS NULL;
 -- Cleanup job that deletes expired sessions.
 CREATE INDEX sessions_expires_at_idx ON sessions (expires_at);
-
--- +goose Down
-DROP TABLE IF EXISTS sessions;

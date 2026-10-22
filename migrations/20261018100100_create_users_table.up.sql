@@ -1,4 +1,3 @@
--- +goose Up
 CREATE TABLE users (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email             TEXT NOT NULL,
@@ -23,6 +22,3 @@ CREATE UNIQUE INDEX users_email_unique ON users (email) WHERE deleted_at IS NULL
 CREATE TRIGGER users_set_updated_at
     BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
--- +goose Down
-DROP TABLE IF EXISTS users;
