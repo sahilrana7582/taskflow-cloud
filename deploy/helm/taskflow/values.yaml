@@ -19,6 +19,7 @@ image:
   pullPolicy: IfNotPresent
 
 service:
+  port: 80
   containerPortName: container-http
   containerPort: 8080
 
