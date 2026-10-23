@@ -1,44 +1,54 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{include "taskflow.fullname" .}}
-  labels: {{- include "taskflow.labels" . | nindent 4}}
+  name: {{ include "taskflow.fullname" . }}
+  labels: 
+    {{- include "taskflow.labels" . | nindent 4 }}
 spec:
-  {{-if not .Values.autoscaling.enabled}}
-  replicas: {{.Values.replicaCount}}
-  {{-end}}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      {{- include "taskflow.selectorLabels" . | nindent 6}}
+      {{- include "taskflow.selectorLabels" . | nindent 6 }}
   template:
-    labels:
-      {{- include "taskflow.labels" .}}
-      {{- with .Values.podLabels}}
-      {{- toYaml . | nindent 6}}
-      {{- end}}
+    metadata:
+      labels:
+        {{- include "taskflow.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
-      container:
-        name: {{ .Chart.Name}}
-        image: "{{ .Values.image.repostiory}}:{{ .Values.image.tag}}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-          - name: {{ .Values.service.containerPortName}}
-            containerPort: {{ .Values.service.containerPort}}
-            protocol: tcp
-        {{- with .Values.readinessProbe}}
-        {{- if .enabled}}
-        readinessProbe:
-          {{- omit . "enabled" | toYaml | nindent 10 }}
-        {{- end}}
-        {{- end }}
-        {{- with .Values.livenessProbe}}
-        {{- if .enabled}}
-        livenessProbe:
-          {{- omit . "enabled" | toYaml | nindent 10 }}
-        {{- end}}
-        {{- end }}
-        {{- with .Values.resources }}
-        resources:
-          {{- toYaml . | nindent 12 }}
-        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: {{ .Values.service.containerPortName }}
+              containerPort: {{ .Values.service.containerPort }}
+              protocol: TCP
+          {{- with .Values.readinessProbe }}
+          {{- if .enabled }}
+          readinessProbe:
+            {{- omit . "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          {{- if .enabled }}
+          livenessProbe:
+            {{- omit . "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            {{- range $key, $value := .Values.env}}
+            - name: {{$key}}
+              value: {{$value | quote}}
+            {{- end}}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.envFromSecret }}
 

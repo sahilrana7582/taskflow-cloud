@@ -1,3 +1,0 @@
-ChartName: {{ include "taskflow.name" . }}
-FullName: {{ include "taskflow.fullname" .}}
-Lables: {{- include "taskflow.labels" . | nindent 4}}

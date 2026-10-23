@@ -1,11 +1,17 @@
 nameOverride: taskflow-be
 fullnameOverride: taskflow-be
 
+metadata:
+  namespace: taskflow
+
 replicaCount: 2
 
+autoscaling:
+  enabled: false
+
 podLabels:
-  - env: dev
-  - team: backend-core
+  env: dev
+  team: backend-core
 
 image:
   repository: taskflow
@@ -13,13 +19,14 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  containerPortName: container-http-port
+  containerPortName: container-http
   containerPort: 8080
 
 livenessProbe:
   enabled: true
-  path: /health
-  port: 8080
+  httpGet:
+    path: /health
+    port: container-http
   initialDelaySeconds: 10
   periodSeconds: 10
   timeoutSeconds: 2
@@ -27,8 +34,9 @@ livenessProbe:
 
 readinessProbe:
   enabled: true
-  path: /health
-  port: 8080
+  httpGet:
+    path: /health
+    port: container-http
   initialDelaySeconds: 5
   periodSeconds: 5
   timeoutSeconds: 2
@@ -41,3 +49,17 @@ resources:
   limits:
     cpu: 500m
     memory: 256Mi
+
+env:
+  TASKFLOW_APP_ENVIRONMENT: production
+  TASKFLOW_APP_NAME: taskflow-cloud
+  TASKFLOW_APP_PORT: "8080"
+
+  TASKFLOW_DATABASE_HOST: taskflow-db-postgresql
+  TASKFLOW_DATABASE_PORT: "5432"
+  TASKFLOW_DATABASE_NAME: taskflow_dev
+  TASKFLOW_DATABASE_USER: taskflow
+  TASKFLOW_DATABASE_SSLMODE: disable
+  TASKFLOW_DATABASE_MIGRATIONS_PATH: internal/db/migrations
+
+envFromSecret: taskflow-secrets

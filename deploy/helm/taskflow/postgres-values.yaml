@@ -1,0 +1,9 @@
+auth:
+  username: taskflow
+  database: taskflow_dev
+  existingSecret: taskflow-db-credentials
+
+primary:
+  persistence:
+    enabled: true
+    size: 1Gi
