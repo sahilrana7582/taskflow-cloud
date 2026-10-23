@@ -16,6 +16,10 @@ spec:
       {{- include "taskflow.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        # Changes whenever a Secret value changes, so the pods roll and pick
+        # up the new env (env vars are only read at container start).
+        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
       labels:
         {{- include "taskflow.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}

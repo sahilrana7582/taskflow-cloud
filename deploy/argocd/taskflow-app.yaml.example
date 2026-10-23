@@ -35,9 +35,12 @@ spec:
         releaseName: taskflow-be
         valuesObject:
           secrets:
+            # The app refuses to start with fewer than 32 bytes.
             jwtSecretKey: "<openssl rand -base64 48>"
-            dbPassword: "<local db password>"
-            postgresAdminPassword: "<local postgres admin password>"
+            # Hex only: the migration Job puts dbPassword in a URL, where
+            # characters like / @ : ? # % < > and spaces break parsing.
+            dbPassword: "<openssl rand -hex 24>"
+            postgresAdminPassword: "<openssl rand -hex 24>"
 
   syncPolicy:
     automated:
