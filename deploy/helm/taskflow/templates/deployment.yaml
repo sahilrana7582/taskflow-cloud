@@ -2,8 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "taskflow.fullname" . }}
-  labels: 
+  labels:
     {{- include "taskflow.labels" . | nindent 4 }}
+  annotations:
+    # Wave 2: starts only after the migration Job (wave 1) has succeeded.
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -48,7 +51,13 @@ spec:
             - name: {{$key}}
               value: {{$value | quote}}
             {{- end}}
+            # Read from the same Secret Postgres was created with, so they can't drift.
+            - name: TASKFLOW_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.dbSecretName }}
+                  key: password
           envFrom:
             - secretRef:
-                name: {{ .Values.envFromSecret }}
+                name: {{ .Values.secrets.appSecretName }}
 

@@ -1,9 +1,6 @@
 nameOverride: taskflow-be
 fullnameOverride: taskflow-be
 
-metadata:
-  namespace: taskflow
-
 replicaCount: 2
 
 autoscaling:
@@ -63,4 +60,18 @@ env:
   TASKFLOW_DATABASE_SSLMODE: disable
   TASKFLOW_DATABASE_MIGRATIONS_PATH: internal/db/migrations
 
-envFromSecret: taskflow-secrets
+migrations:
+  image:
+    repository: taskflow-migrator
+    tag: local
+    pullPolicy: IfNotPresent
+
+secrets:
+  appSecretName: taskflow-secrets
+  # Also used by the Postgres release (auth.existingSecret in deploy/helm/postgres/values.yaml).
+  dbSecretName: taskflow-db-credentials
+  # Never set these here: the repo is public. They are set in the
+  # gitignored deploy/argocd/taskflow-app.yaml.
+  jwtSecretKey: ""
+  dbPassword: ""
+  postgresAdminPassword: ""
