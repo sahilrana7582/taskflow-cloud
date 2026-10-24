@@ -1,0 +1,77 @@
+nameOverride: taskflow-be
+fullnameOverride: taskflow-be
+
+replicaCount: 2
+
+autoscaling:
+  enabled: false
+
+podLabels:
+  env: dev
+  team: backend-core
+
+image:
+  repository: taskflow
+  tag: local
+  pullPolicy: IfNotPresent
+
+service:
+  port: 80
+  containerPortName: container-http
+  containerPort: 8080
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: container-http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: container-http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+env:
+  TASKFLOW_APP_ENVIRONMENT: production
+  TASKFLOW_APP_NAME: taskflow-cloud
+  TASKFLOW_APP_PORT: "8080"
+
+  TASKFLOW_DATABASE_HOST: taskflow-db-postgresql
+  TASKFLOW_DATABASE_PORT: "5432"
+  TASKFLOW_DATABASE_NAME: taskflow_dev
+  TASKFLOW_DATABASE_USER: taskflow
+  TASKFLOW_DATABASE_SSLMODE: disable
+  TASKFLOW_DATABASE_MIGRATIONS_PATH: internal/db/migrations
+
+migrations:
+  image:
+    repository: taskflow-migrator
+    tag: local
+    pullPolicy: IfNotPresent
+
+secrets:
+  appSecretName: taskflow-secrets
+  # Also used by the Postgres release (auth.existingSecret in deploy/helm/postgres/values.yaml).
+  dbSecretName: taskflow-db-credentials
+  # Never set these here: the repo is public. They are set in the
+  # gitignored deploy/argocd/taskflow-app.yaml.
+  jwtSecretKey: ""
+  dbPassword: ""
+  postgresAdminPassword: ""

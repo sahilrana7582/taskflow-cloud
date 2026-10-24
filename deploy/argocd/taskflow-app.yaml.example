@@ -1,0 +1,54 @@
+# Copy to taskflow-app.yaml (gitignored), fill in the secrets, then:
+#   kubectl apply -f deploy/argocd/taskflow-app.yaml
+#
+# One Application with two sources, so sync waves order resources across both:
+#   -2 Namespace  ->  -1 Secrets  ->  0 Postgres  ->  1 migration Job  ->  2 app
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: taskflow
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: taskflow
+
+  sources:
+    # Postgres from the Bitnami chart, with values read from this repo ($values).
+    - repoURL: https://charts.bitnami.com/bitnami
+      chart: postgresql
+      targetRevision: 18.12.14
+      helm:
+        releaseName: taskflow-db
+        valueFiles:
+          - $values/deploy/helm/postgres/values.yaml
+
+    # The TaskFlow chart. `ref: values` also exposes this repo to the source above.
+    - repoURL: https://github.com/sahilrana7582/taskflow-cloud.git
+      # Argo CD reads from GitHub, not your disk: push before syncing.
+      # Switch to main after merging.
+      targetRevision: feature/helm-deploy
+      path: deploy/helm/taskflow
+      ref: values
+      helm:
+        releaseName: taskflow-be
+        valuesObject:
+          secrets:
+            # The app refuses to start with fewer than 32 bytes.
+            jwtSecretKey: "<openssl rand -base64 48>"
+            # Hex only: the migration Job puts dbPassword in a URL, where
+            # characters like / @ : ? # % < > and spaces break parsing.
+            dbPassword: "<openssl rand -hex 24>"
+            postgresAdminPassword: "<openssl rand -hex 24>"
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 1m

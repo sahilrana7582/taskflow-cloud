@@ -127,6 +127,8 @@ kubeconfig*
 *.secret.yaml
 # Plain Secret manifests hold real values; commit secret.yaml.example instead
 platform/k8s/**/secret.yaml
+# Argo CD Application with real secret values; commit the .example instead
+deploy/argocd/taskflow-app.yaml
 charts/*.tgz
 .helm/
 

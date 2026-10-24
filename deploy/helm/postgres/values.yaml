@@ -1,0 +1,17 @@
+# Values for the Bitnami postgresql chart (release: taskflow-db).
+
+# Wave 0: after the namespace and Secrets (waves -2, -1), before the
+# migration Job (wave 1). Argo CD waits for the StatefulSet to be ready.
+commonAnnotations:
+  argocd.argoproj.io/sync-wave: "0"
+
+auth:
+  username: taskflow
+  database: taskflow_dev
+  # Created by the taskflow chart at wave -1.
+  existingSecret: taskflow-db-credentials
+
+primary:
+  persistence:
+    enabled: true
+    size: 1Gi
